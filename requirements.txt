@@ -1,5 +1,6 @@
 flask
 requests
 schedule
-python-telegram-bot==13.15
 matplotlib
+python-telegram-bot==13.15
+snscrape
