@@ -19,16 +19,16 @@ bot = Bot(token=TOKEN)
 # Biến lưu ID bài Twitter đã gửi
 last_sent_tweet_ids = {}
 
-# Gửi tin nhắn + ảnh (hoặc chỉ tin nhắn)
+# Gửi tin nhắn + ảnh (hỗ trợ Markdown)
 def send_signal_message(text, fig=None):
     if fig:
         buf = BytesIO()
         fig.savefig(buf, format='png')
         buf.seek(0)
-        bot.send_photo(chat_id=CHAT_ID, photo=buf, caption=text)
+        bot.send_photo(chat_id=CHAT_ID, photo=buf, caption=text, parse_mode="Markdown")
         plt.close(fig)
     else:
-        bot.send_message(chat_id=CHAT_ID, text=text)
+        bot.send_message(chat_id=CHAT_ID, text=text, parse_mode="Markdown")
 
 # Lấy dữ liệu giá PI từ MEXC
 def fetch_price_data():
@@ -97,20 +97,20 @@ def check_signals():
     latest_sma20 = sma20[-1]
     latest_sma50 = sma50[-1]
 
-    signal = f"""📈 PI/USDT - Cập nhật kỹ thuật:
+    signal = f"""📈 *PI/USDT - Cập nhật kỹ thuật:*
 
-- Giá hiện tại: ${latest_price:.4f}
-- RSI(14): {latest_rsi:.2f}
-- SMA20: {latest_sma20:.4f}
-- SMA50: {latest_sma50:.4f}
+• *Giá hiện tại:* `${latest_price:.4f}`
+• *RSI(14):* `{latest_rsi:.2f}`
+• *SMA20:* `{latest_sma20:.4f}`
+• *SMA50:* `{latest_sma50:.4f}`
 """
 
     if latest_rsi < 30:
-        signal += "\n🔻 RSI < 30 → Tín hiệu quá bán, cơ hội tích lũy đẹp."
+        signal += "\n\n🔻 *RSI < 30 → Tín hiệu quá bán, cơ hội tích lũy đẹp.*"
     elif latest_rsi > 30 and rsi[-2] < 30 and latest_price > latest_sma20:
-        signal += "\n✅ RSI bật từ dưới 30 lên + Giá vượt SMA → Điểm mua kỹ thuật đẹp."
+        signal += "\n\n✅ *RSI bật từ dưới 30 lên + Giá vượt SMA → Điểm mua kỹ thuật đẹp.*"
     else:
-        signal += "\nℹ️ Không có tín hiệu mua nổi bật, tiếp tục theo dõi tích lũy."
+        signal += "\n\nℹ️ *Không có tín hiệu mua nổi bật, tiếp tục theo dõi tích lũy.*"
 
     # Gửi tín hiệu + biểu đồ
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -132,7 +132,7 @@ def check_signals():
 
     add_logo(fig, ax)
     send_signal_message(signal, fig)
-    print("📨 Đã gửi cập nhật kỹ thuật về Channel.")
+    print("📨 Đã gửi cập nhật kỹ thuật về Telegram.")
 
 # Hàm lấy bài mới từ Twitter
 def fetch_latest_tweet(username):
@@ -152,8 +152,8 @@ def send_latest_tweets():
             tweet_id = tweet.id
             if last_sent_tweet_ids.get(user) != tweet_id:
                 last_sent_tweet_ids[user] = tweet_id
-                message = f"📰 Cập nhật từ @{user}:\n\n{tweet.content}"
-                bot.send_message(chat_id=CHAT_ID, text=message)
+                message = f"📰 *Cập nhật từ @{user}:*\n\n{tweet.content}"
+                bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="Markdown")
                 print(f"✅ Đã gửi bài mới từ @{user}")
             else:
                 print(f"ℹ️ Chưa có bài mới từ @{user}")
