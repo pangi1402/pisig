@@ -163,7 +163,7 @@ SMA50: {latest_sma50:.4f}
 
 # 🕒 Lịch gửi tín hiệu kỹ thuật
 schedule.every().day.at("02:00").do(check_signals)  # 9h VN
-schedule.every().day.at("06:50").do(check_signals)  # 12h VN
+schedule.every().day.at("06:00").do(check_signals)  # 12h VN
 schedule.every().day.at("10:00").do(check_signals)  # 17h VN
 schedule.every().day.at("16:30").do(check_signals)  # 23h30 VN
 
