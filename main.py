@@ -32,19 +32,31 @@ def send_signal_message(text, fig=None):
 
 # Lấy dữ liệu giá PI từ MEXC
 def fetch_price_data():
-    url = "https://www.mexc.com/open/api/v2/market/kline?symbol=PI_USDT&interval=4h&limit=120"
+    url = "https://api.coingecko.com/api/v3/coins/pi-network/market_chart?vs_currency=usd&days=7&interval=hourly"
     try:
         res = requests.get(url)
         if res.status_code != 200:
-            print(f"⚠️ API lỗi: {res.status_code}")
+            print(f"⚠️ API CoinGecko lỗi: {res.status_code}")
             return [], []
         data = res.json()
-        klines = data.get("data", [])
-        prices = [float(candle[2]) for candle in klines]
-        dates = [datetime.fromtimestamp(int(candle[0]) / 1000).strftime("%d/%m %H:%M") for candle in klines]
+        raw_prices = data.get("prices", [])
+
+        # Ghép 4 cây 1H thành 1 cây 4H
+        prices = []
+        dates = []
+        for i in range(0, len(raw_prices), 4):
+            batch = raw_prices[i:i+4]
+            if len(batch) == 4:
+                price = batch[-1][1]  # giá đóng cửa cây 4H
+                time_stamp = batch[-1][0]
+                prices.append(price)
+                date_str = datetime.fromtimestamp(time_stamp / 1000).strftime("%d/%m %H:%M")
+                dates.append(date_str)
+
         return prices, dates
+
     except Exception as e:
-        print(f"⚠️ Lỗi lấy dữ liệu: {e}")
+        print(f"⚠️ Lỗi lấy dữ liệu từ CoinGecko: {e}")
         return [], []
 
 # Tính SMA, RSI
